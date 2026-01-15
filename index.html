@@ -1,71 +1,587 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>🦁 Identificador de Felinos - ML</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 40px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .webcam-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        #webcam-container {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border: 3px solid #667eea;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        #webcam-container canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.6);
+        }
+
+        .predictions-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .predictions-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #label-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .prediction-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            animation: fadeIn 0.5s ease-out;
+            transition: all 0.3s ease;
+            cursor: default;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .prediction-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .prediction-item.high-confidence {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-left-color: #30b169;
+        }
+
+        .prediction-item.medium-confidence {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border-left-color: #f5576c;
+        }
+
+        .prediction-item.low-confidence {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left-color: #999;
+        }
+
+        .prediction-label {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .prediction-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .prediction-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            animation: fillWidth 0.6s ease-out;
+        }
+
+        @keyframes fillWidth {
+            from {
+                width: 0;
+            }
+        }
+
+        .prediction-percentage {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 5px;
+            color: #555;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #999;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.active {
+            background: #30b169;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .top-class-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .top-class-indicator.empty {
+            background: #ddd;
+            color: #999;
+            font-size: 1em;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        .emoji-large {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji-large">🦁</div>
+            <h1>Identificador de Felinos</h1>
+            <p>Reconhecimento em Tempo Real com Machine Learning</p>
+        </div>
 
-<div>Teachable Machine Image Model</div>
-<button type="button" onclick="init()">Start</button>
-<div id="webcam-container"></div>
-<div id="label-container"></div>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-<script type="text/javascript">
-    // More API functions here:
-    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+        <div class="content">
+            <div class="webcam-section">
+                <div id="webcam-container"></div>
+                <div class="button-group">
+                    <button class="btn-start" id="startBtn" onclick="startCamera()">Iniciar Câmera</button>
+                    <button class="btn-stop" id="stopBtn" onclick="stopCamera()" disabled>Parar</button>
+                </div>
+                <div class="loading-spinner" id="loadingSpinner"></div>
+            </div>
 
-    // the link to your model provided by Teachable Machine export panel
-    const URL = "./";
+            <div class="predictions-section">
+                <div class="predictions-title">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    Classificações
+                </div>
+                <div id="label-container"></div>
+                <div class="top-class-indicator empty" id="topClassIndicator">
+                    ⏳ Aguardando captura...
+                </div>
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <span class="stat-label">Status:</span>
+                        <span class="stat-value" id="statusText">Inativo</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Confiança Máxima:</span>
+                        <span class="stat-value" id="confidenceText">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Classe Detectada:</span>
+                        <span class="stat-value" id="classText">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    let model, webcam, labelContainer, maxPredictions;
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        const URL = "./";
+        let model, webcam, labelContainer, maxPredictions;
+        let isRunning = false;
+        let animationId = null;
 
-    // Load the image model and setup the webcam
-    async function init() {
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
+        const elements = {
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            labelContainer: document.getElementById('label-container'),
+            loadingSpinner: document.getElementById('loadingSpinner'),
+            statusIndicator: document.getElementById('statusIndicator'),
+            statusText: document.getElementById('statusText'),
+            confidenceText: document.getElementById('confidenceText'),
+            classText: document.getElementById('classText'),
+            topClassIndicator: document.getElementById('topClassIndicator'),
+            webcamContainer: document.getElementById('webcam-container')
+        };
 
-        // load the model and metadata
-        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-        // or files from your local hard drive
-        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
+        async function startCamera() {
+            try {
+                elements.loadingSpinner.classList.add('active');
+                elements.statusText.textContent = 'Carregando modelo...';
 
-        // Convenience function to setup a webcam
-        const flip = true; // whether to flip the webcam
-        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-        await webcam.setup(); // request access to the webcam
-        await webcam.play();
-        window.requestAnimationFrame(loop);
+                const modelURL = URL + "model.json";
+                const metadataURL = URL + "metadata.json";
 
-        // append elements to the DOM
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
-        labelContainer = document.getElementById("label-container");
-        for (let i = 0; i < maxPredictions; i++) { // and class labels
-            labelContainer.appendChild(document.createElement("div"));
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                const flip = true;
+                webcam = new tmImage.Webcam(320, 320, flip);
+                await webcam.setup();
+                await webcam.play();
+
+                elements.loadingSpinner.classList.remove('active');
+                elements.statusText.textContent = 'Câmera ativa';
+                elements.statusIndicator.classList.add('active');
+                elements.startBtn.disabled = true;
+                elements.stopBtn.disabled = false;
+                isRunning = true;
+
+                elements.webcamContainer.innerHTML = '';
+                elements.webcamContainer.appendChild(webcam.canvas);
+
+                labelContainer = elements.labelContainer;
+                labelContainer.innerHTML = '';
+
+                for (let i = 0; i < maxPredictions; i++) {
+                    const predictionDiv = document.createElement('div');
+                    predictionDiv.className = 'prediction-item';
+                    predictionDiv.innerHTML = `
+                        <div class="prediction-label"></div>
+                        <div class="prediction-bar">
+                            <div class="prediction-fill"></div>
+                        </div>
+                        <div class="prediction-percentage"></div>
+                    `;
+                    labelContainer.appendChild(predictionDiv);
+                }
+
+                loop();
+            } catch (error) {
+                console.error('Erro ao iniciar câmera:', error);
+                elements.statusText.textContent = 'Erro ao iniciar câmera';
+                elements.loadingSpinner.classList.remove('active');
+                alert('Erro ao iniciar câmera. Verifique as permissões.');
+            }
         }
-    }
 
-    async function loop() {
-        webcam.update(); // update the webcam frame
-        await predict();
-        window.requestAnimationFrame(loop);
-    }
-
-    // run the webcam image through the image model
-    async function predict() {
-        // predict can take in an image, video or canvas html element
-        const prediction = await model.predict(webcam.canvas);
-        for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
+        function stopCamera() {
+            isRunning = false;
+            if (webcam) {
+                webcam.stop();
+            }
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            elements.statusText.textContent = 'Inativo';
+            elements.statusIndicator.classList.remove('active');
+            elements.startBtn.disabled = false;
+            elements.stopBtn.disabled = true;
+            elements.confidenceText.textContent = '0%';
+            elements.classText.textContent = '-';
+            elements.topClassIndicator.textContent = '⏳ Aguardando captura...';
+            elements.topClassIndicator.classList.add('empty');
+            elements.webcamContainer.innerHTML = '';
+            labelContainer.innerHTML = '';
         }
-    }
-</script>
 
+        async function loop() {
+            if (!isRunning) return;
+
+            webcam.update();
+            await predict();
+            animationId = window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+
+            let maxProb = 0;
+            let maxClass = '';
+            let maxIndex = 0;
+
+            for (let i = 0; i < maxPredictions; i++) {
+                const probability = prediction[i].probability;
+                const className = prediction[i].className;
+
+                const percentage = (probability * 100).toFixed(1);
+                const predictionElement = labelContainer.childNodes[i];
+
+                if (predictionElement) {
+                    const label = predictionElement.querySelector('.prediction-label');
+                    const fill = predictionElement.querySelector('.prediction-fill');
+                    const percentText = predictionElement.querySelector('.prediction-percentage');
+
+                    label.textContent = className;
+                    fill.style.width = percentage + '%';
+                    percentText.textContent = percentage + '%';
+
+                    if (probability > 0.5) {
+                        predictionElement.classList.add('high-confidence');
+                        predictionElement.classList.remove('medium-confidence', 'low-confidence');
+                    } else if (probability > 0.2) {
+                        predictionElement.classList.add('medium-confidence');
+                        predictionElement.classList.remove('high-confidence', 'low-confidence');
+                    } else {
+                        predictionElement.classList.add('low-confidence');
+                        predictionElement.classList.remove('high-confidence', 'medium-confidence');
+                    }
+                }
+
+                if (probability > maxProb) {
+                    maxProb = probability;
+                    maxClass = className;
+                    maxIndex = i;
+                }
+            }
+
+            elements.confidenceText.textContent = (maxProb * 100).toFixed(1) + '%';
+            elements.classText.textContent = maxClass;
+
+            if (maxProb > 0.6) {
+                elements.topClassIndicator.classList.remove('empty');
+                elements.topClassIndicator.innerHTML = `🎯 ${maxClass}<br><small style="font-size: 0.8em;">Confiança: ${(maxProb * 100).toFixed(1)}%</small>`;
+            } else {
+                elements.topClassIndicator.classList.add('empty');
+                elements.topClassIndicator.textContent = '⏳ Processando...';
+            }
+        }
+    </script>
 </body>
 </html>
